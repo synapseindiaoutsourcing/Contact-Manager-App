@@ -1,0 +1,153 @@
+﻿@model ContactManager.Core.DTO.ContactsDTO
+
+@{
+    ViewData["Title"] = "Add";
+}
+
+
+<div class="container-fluid mt--7">
+
+    @using (Html.BeginForm("Add", "Contact", FormMethod.Post, new { id = "form-customer", enctype = "multipart/form-data" }))
+    {
+        <div class="row">
+            <div class="col-xl-12 order-xl-1">
+                <div class="card bg-secondary shadow childContent">
+                    @if (@ViewBag.Message != null)
+                    {
+                        <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:10px;">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true" style="font-size:20px">×</span>
+                            </button>    <strong></strong> @ViewBag.Message
+                        </div>
+                    }
+
+                    <div class="card-header bg-white border-0">
+                        <div class="row align-items-center">
+                            <div class="col-8">
+                                <h3 class="mb-0">Add Contact</h3>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body" style="background-color:lightgray;">
+                        <div class="pl-lg-4">
+
+                            <div class="row">
+                                <div class="col-sm-5">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="mb-3 row">
+                                                <div class="col-sm-4">
+                                                    <label class="form-control-label" for="input-username">First Name(<label style="color:red">*</label>) :</label>
+                                                </div>
+
+                                                <div class="col-sm-8">
+                                                    @Html.TextBoxFor(x => x.FirstName, new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(m => m.FirstName, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 row">
+                                                <div class="col-sm-4">
+                                                    <label class="form-control-label" for="input-username">Last Name(<label style="color:red">*</label>) :</label>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    @Html.TextBoxFor(x => x.LastName, new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(m => m.LastName, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 row">
+                                                <div class="col-sm-4">
+                                                    <label class="form-control-label" for="input-username">Phone Number(<label style="color:red">*</label>) :</label>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    @Html.TextBoxFor(x => x.PhoneNumber, new { @class = "form-control", onkeypress = "return onlyNos(event,this);" })
+                                                    @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 row">
+
+                                                <div class="col-sm-4">
+                                                    <label class="form-control-label" for="input-username">Email Address(<label style="color:red">*</label>) :</label>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    @Html.TextBoxFor(x => x.EmailAddress, new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(m => m.EmailAddress, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 row">
+                                                <div class="col-sm-4">
+                                                    <label class="form-control-label" for="input-username">Date OF Birth :</label>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    @Html.TextBoxFor(mode => Model.DOB, "{0:yyyy-MM-dd}", new { @type = "date", @class = "form-control form-control-alternative" })
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 row">
+                                                <div class="col-sm-4">
+                                                    <label class="form-control-label" for="input-username">Company :</label>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    @Html.TextBoxFor(x => x.CompanyName, new { @class = "form-control" })
+                                                </div>
+
+                                            </div>
+                                            <div class="mb-3 row">
+
+                                                <div class="col-sm-4">
+                                                    <label class="form-control-label" for="input-username"> Address(<label style="color:red">*</label>) :</label>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    @Html.TextAreaFor(x => x.Address, new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(m => m.Address, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <hr class="my-4" />
+                            <div class="col text-right">
+                                <a href="@Url.Action("Index","Contact")" class="btn btn-sm btn-primary">Go Back</a>
+                                <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+<script type="text/javascript">
+    function onlyNos(e, t) {
+        try {
+            if (window.event) {
+                var charCode = window.event.keyCode;
+            }
+            else if (e) {
+                var charCode = e.which;
+            }
+            else { return true; }
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                return false;
+            }
+            return true;
+        }
+        catch (err) {
+            alert(err.Description);
+        }
+
+    }
+</script>
+
+
+
+
+
+
+

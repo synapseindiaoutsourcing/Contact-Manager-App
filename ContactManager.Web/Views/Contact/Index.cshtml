@@ -1,0 +1,559 @@
+﻿@model List<ContactManager.Core.Responses.ContactsResponse>
+@{
+    ViewData["Title"] = "Index";
+
+}
+<style type="text/css">
+
+    .table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 2px;
+    }
+
+        .table th, .table td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .table thead th {
+            background-color: #87CEFA;
+            color: #E0FFFF;
+        }
+
+    .borderNone {
+        border-bottom: none;
+    }
+
+    .table-input {
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 8px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .popup-alertmsg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+
+
+
+    .popup-content {
+        right: 20px; /* Adjust this value to set the desired distance from the right side of the screen */
+        background-color: white;
+        padding: 20px;
+        max-width: 20%;
+        border-radius: 5px;
+        position: fixed;
+        top: 50%;
+        transform: translate(0, -50%);
+        height: 95%;
+        overflow: auto;
+    }
+
+    .popup-contentsingle {
+        background-color: white;
+        padding: 20px;
+        max-width: 38%;
+        border-radius: 5px;
+        /* Center the popup */
+        position: relative;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        height: 95%; /* Set a fixed height */
+        overflow: auto; /* Enable scrolling if content exceeds the height */
+    }
+
+    .popup-an {
+        background-color: white;
+        padding: 12px;
+        max-width: 35%;
+        border-radius: 5px;
+        /* Center the popup */
+        position: relative;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        height: 60%;
+        overflow: auto; /* Enable scrolling if content exceeds the height */
+    }
+
+
+    .popup-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+
+
+    .close-btn {
+        background-color: #fffcfc;
+        border: none;
+        cursor: pointer;
+    }
+
+
+
+    .popup-body {
+        margin-bottom: 10px;
+    }
+
+
+
+    .popup-footer {
+        text-align: right;
+    }
+</style>
+
+<!-- Page content -->
+<div class="container-fluid mt--7">
+    <!-- Table -->
+    <div class="row">
+        <div class="col">
+            <div class="card shadow childContent">
+                <div class="card-header border-0">
+                    <h3 class="mb-0">Contact List</h3>
+                    <br />
+                    <div class="col text-right">
+                        <a href="@Url.Action("Add","Contact")" class="btn btn-sm btn-primary">Add New</a>
+                    </div>
+                </div>
+
+                <div class="table-responsive" style="padding:1%">
+                    <br />
+                    <table class="table align-items-center table-flush" id="ItemsTable">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col" class="nosort">Sr. No.</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Phone Number</th>
+                                <th scope="col">Email</th>
+
+                                <th scope="col">Address</th>
+                                <th scope="col">Date Of Birth</th>
+                                <th scope="col" class="nosort">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @(Model.IndexOf(item) + 1)
+                                    </td>
+                                    <td>
+                                        @item.FirstName @item.LastName
+                                    </td>
+                                    <td>
+                                        @item.PhoneNumber
+                                    </td>
+                                    <td>
+                                        @item.EmailAddress
+                                    </td>
+                                    <td>
+                                        @item.Address
+                                    </td>
+                                    <td>
+                                        @item.DOB?.ToString("dd/MM/yyyy")
+                                    </td>
+                                    <td>
+                                        <input type="button" class="btn btn-sm btn-primary" value="View" id="btnopenpopup" onclick="return openpopup(@item.Id)" />
+                                    </td>
+
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div id="chargePopup" class="popup" style="display: none;">
+    <div class="popup-contentsingle">
+        <div class="popup-header">
+            <h6>View/Edit</h6>
+            <button type="button" class="close-btn" aria-label="Close" onclick="closePopup()">
+                <strong><span aria-hidden="true">&times;</span></strong>
+            </button>
+        </div>
+        <div class="popup-body row">
+            <div class="col-12">
+
+
+                <table class="table">
+                    <thead class="thead-dark" style="background-color: #87CEFA;">
+                        <tr>
+                            <td colspan="2"><h7>View/Edit</h7></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><label for="FirstName">First Name(<label style="color:red">*</label>):</label></td>
+                            <td>
+                                <input type="text" class="form-control" id="txtFirstName" required>
+                                <span class="error" id="FirstName-error" style="color:red;"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label for="LastName">Last Name(<label style="color:red">*</label>):</label></td>
+                            <td>
+                                <input type="text" class="form-control" id="txtLastName" required>
+                                <span class="error" id="LastName-error" style="color:red;"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label for="PhoneNumber">Phone Number(<label style="color:red">*</label>):</label></td>
+                            <td>
+                                <input type="text" class="form-control" id="txtPhoneNumber" onkeypress="return onlyNos(event,this);" required>
+                                <span class="error" id="PhoneNumber-error" style="color:red;"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label for="EmailAddress">Email Address(<label style="color:red">*</label>):</label></td>
+                            <td>
+                                <input type="text" class="form-control" id="txtEmailAddress" required>
+                                <span class="error" id="EmailAddress-error" style="color:red;"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label for="dob">Date Of Birth(<label style="color:red">*</label>):</label></td>
+                            <td>
+                                <input type="date" class="form-control" id="txtdob" required>
+                                <span class="error" id="dob-error" style="color:red;"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label for="Company">Company(<label style="color:red">*</label>):</label></td>
+                            <td>
+                                <input type="text" class="form-control" id="txtCompany" required>
+                                <span class="error" id="Company-error" style="color:red;"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label for="city">Address(<label style="color:red">*</label>):</label></td>
+                            <td>
+                                <textarea id="txtAddress" class="form-control" rows="4" cols="4" required></textarea>
+                                <span class="error" id="Address-error" style="color:red;"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div id="map" style="width: 500px; height: 300px;"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <br />
+                <div class="form-group text-center">
+                    <input type="hidden" id="hdnId" />
+                    <input type="hidden" id="hdnLat" />
+                    <input type="hidden" id="hdnLong" />
+                    <button type="button" class="btn btn-primary" id="btnSubmit" onclick="submitForm()">Update</button>
+                    <button type="button" class="btn btn-primary" id="btndelete" onclick="deleteForm()">Delete</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script src="~/js/validation.js"></script>
+<link href="~/css/jquery.dataTable.css" rel="stylesheet" />
+<script src="~/js/jquery.dataTables.js"></script>
+<script src="http://maps.google.com/maps/api/js?key=AIzaSyDcTw67RgXKe6SDKLUcO6aPsPlx5fy7KG0" type="text/javascript"></script>
+
+<script>
+
+    (function ($) {
+        var table = $('#ItemsTable').dataTable({
+            'aoColumnDefs': [{
+                'bSortable': false,
+                'aTargets': ['nosort']
+            }]
+        });
+    })(jQuery);
+</script>
+
+
+
+<script type="text/javascript">
+    function openpopup(Id) {
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("EditDetails", "Contact")',
+            data: { id: Id },
+            dataType: 'Json',
+            success: function (data) {
+
+                if (data.result == true) {
+                    $('#hdnId').val(data.response.Id);
+                    $('#hdnLat').val(data.response.Lat);
+                    $('#hdnLong').val(data.response.Long);
+                    $('#txtFirstName').val(data.response.FirstName);
+                    $('#txtLastName').val(data.response.LastName);
+                    $('#txtPhoneNumber').val(data.response.PhoneNumber);
+                    $('#txtEmailAddress').val(data.response.EmailAddress);
+                    var now = new Date(data.response.DOB);
+                    var day = ("0" + now.getDate()).slice(-2);
+                    var month = ("0" + (now.getMonth() + 1)).slice(-2);
+                    var today = now.getFullYear() + "-" + (month) + "-" + (day);
+                    $('#txtdob').val(today);
+                    $('#txtCompany').val(data.response.CompanyName);
+                    $('#txtAddress').val(data.response.Address);
+                    initMap();
+                    document.getElementById("chargePopup").style.display = "block";
+                }
+                else {
+                    alert(data.message);
+                    return false;
+                }
+            },
+            error: function (error) {
+                if (error.status == 200) {
+                    return false;
+                }
+            }
+        });
+
+    }
+
+    function closePopup() {
+        document.getElementById("FirstName-error").innerHTML = "";
+        document.getElementById("LastName-error").innerHTML = "";
+        document.getElementById("PhoneNumber-error").innerHTML = "";
+        document.getElementById("EmailAddress-error").innerHTML = "";
+        document.getElementById("dob-error").innerHTML = "";
+        document.getElementById("Company-error").innerHTML = "";
+        document.getElementById("Address-error").innerHTML = "";
+        document.getElementById("chargePopup").style.display = "none";
+    }
+
+    function validateForm() {
+        const FirstName = document.getElementById("txtFirstName").value;
+        const LastName = document.getElementById("txtLastName").value;
+        const PhoneNumber = document.getElementById("txtPhoneNumber").value;
+        const EmailAddress = document.getElementById("txtEmailAddress").value;
+        const dob = document.getElementById("txtdob").value;
+        const Company = document.getElementById("txtCompany").value;
+        const Address = document.getElementById("txtAddress").value;
+
+
+        document.getElementById("FirstName-error").innerHTML = "";
+        document.getElementById("LastName-error").innerHTML = "";
+        document.getElementById("PhoneNumber-error").innerHTML = "";
+        document.getElementById("EmailAddress-error").innerHTML = "";
+        document.getElementById("dob-error").innerHTML = "";
+        document.getElementById("Company-error").innerHTML = "";
+        document.getElementById("Address-error").innerHTML = "";
+
+        if (FirstName === "") {
+            var fTableBody = document.getElementById("FirstName-error");
+            fTableBody.innerHTML = "Please Enter First Name";
+            return false;
+        }
+        if (LastName === "") {
+            var lTableBody = document.getElementById("LastName-error");
+            lTableBody.innerHTML = "Please Enter Last Name";
+            return false;
+        }
+        if (PhoneNumber === "") {
+            var phoneTableBody = document.getElementById("PhoneNumber-error");
+            phoneTableBody.innerHTML = "Please Enter Phone Number";
+            return false;
+        }
+        // if (validateMobile(PhoneNumber)) {
+        //    var phoneTableBody = document.getElementById("PhoneNumber-error");
+        //     phoneTableBody.innerHTML = "Invalid Phone Number";
+        //     return false;
+        // }
+        if (PhoneNumber.length != 10) {
+            var phoneTableBody = document.getElementById("PhoneNumber-error");
+            phoneTableBody.innerHTML = "Invalid Phone Number";
+            return false
+        }
+        if (EmailAddress === "") {
+            var emailTableBody = document.getElementById("EmailAddress-error");
+            emailTableBody.innerHTML = "Please Enter Email Address";
+            return false;
+        }
+        if (!validateEmail(EmailAddress)) {
+            var emailTableBody = document.getElementById("EmailAddress-error");
+            emailTableBody.innerHTML = "Invalid Email Address";
+            return false;
+        }
+
+        if (dob === "") {
+            var dobTableBody = document.getElementById("dob-error");
+            dobTableBody.innerHTML = "Please Enter Date of Birth";
+            return false;
+        }
+        if (Company === "") {
+            var companyTableBody = document.getElementById("Company-error");
+            companyTableBody.innerHTML = "Please Enter Company";
+            return false;
+        }
+        if (Address === "") {
+            var AddressTableBody = document.getElementById("Address-error");
+            AddressTableBody.innerHTML = "Please Enter Address";
+            return false;
+        }
+        return true;
+    }
+    function submitForm() {
+
+        if (!validateForm()) {
+            return false;
+        }
+        var Id = $('#hdnId').val();
+        var FirstName = $('#txtFirstName').val();
+        var LastName = $('#txtLastName').val();
+        var PhoneNumber = $('#txtPhoneNumber').val();
+        var EmailAddress = $('#txtEmailAddress').val();
+        var DOB = $('#txtdob').val();
+        var CompanyName = $('#txtCompany').val();
+        var Address = $('#txtAddress').val();
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("UpdateContact", "Contact")',
+            data: { Id: Id, FirstName: FirstName, LastName: LastName, PhoneNumber: PhoneNumber, EmailAddress: EmailAddress, DOB: DOB, CompanyName: CompanyName, Address: Address },
+            dataType: 'Json',
+            success: function (data) {
+                if (data.result == true) {
+                    alert("Record updated successfully");
+                    location.reload();
+                }
+                else {
+                    alert(data.message);
+                    return false;
+                }
+            },
+            error: function (error) {
+                if (error.status == 200) {
+                    return false;
+                }
+            }
+        });
+    }
+    function deleteForm() {
+        var Id = $('#hdnId').val();
+        if (confirm("Are you sure, you want to delete record?") == true) {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Delete", "Contact")',
+                data: { id: Id },
+                dataType: 'Json',
+                success: function (data) {
+
+                    if (data.result == true) {
+                        alert("Record deleted successfully.");
+                        document.getElementById("chargePopup").style.display = "none";
+                        location.reload();
+                    }
+                    else {
+                        alert(data.message);
+                        document.getElementById("chargePopup").style.display = "block";
+                        return false;
+                    }
+                },
+                error: function (error) {
+                    if (error.status == 200) {
+                        return false;
+                    }
+                }
+            });
+        }
+    }
+
+
+</script>
+
+<script type="text/javascript">
+    let map;
+    async function initMap() {
+        var Lat = $('#hdnLat').val();
+        var Long = $('#hdnLong').val();
+        // The location of Uluru
+        const position = { lat: parseFloat(Lat), lng: parseFloat(Long) };
+        // Request needed libraries.
+
+        const { Map } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+
+        // The map, centered at Uluru
+        map = new Map(document.getElementById("map"), {
+            zoom: 4,
+            center: position,
+            mapId: "DEMO_MAP_ID",
+        });
+
+        // The marker, positioned at Uluru
+        const marker = new AdvancedMarkerElement({
+            map: map,
+            position: position,
+            title: "Uluru",
+        });
+    }
+
+
+
+</script>
+
+<script type="text/javascript">
+    function onlyNos(e, t) {
+        try {
+            if (window.event) {
+                var charCode = window.event.keyCode;
+            }
+            else if (e) {
+                var charCode = e.which;
+            }
+            else { return true; }
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                return false;
+            }
+            return true;
+        }
+        catch (err) {
+            alert(err.Description);
+        }
+
+    }
+</script>
+
+
+
+
